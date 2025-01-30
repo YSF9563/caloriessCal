@@ -105,7 +105,10 @@ function App() {
   const [step, setStep] = useState(1);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
-    return savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    if (savedTheme) {
+      return savedTheme === 'dark';
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
   const [formData, setFormData] = useState<FormData>(() => {
@@ -136,6 +139,18 @@ function App() {
   const [calories, setCalories] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [currentView, setCurrentView] = useState<View>('calculator');
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem('theme')) {
+        setIsDarkMode(e.matches);
+      }
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
@@ -255,37 +270,43 @@ function App() {
   };
 
   const addWeightEntry = (weight: number) => {
-    const today = new Date().toISOString().split('T')[0];
-    const newEntry = { date: today, weight };
-    setFormData(prev => ({
-      ...prev,
-      weightEntries: [...prev.weightEntries, newEntry].sort((a, b) => 
-        new Date(a.date).getTime() - new Date(b.date).getTime()
-      )
-    }));
-    checkMetabolism();
+    const date = new Date().toISOString().split('T')[0];
+    const newEntry: WeightEntry = { date, weight };
+    
+    setFormData(prev => {
+      // Sort entries by date in descending order
+      const updatedEntries = [...prev.weightEntries, newEntry]
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      return {
+        ...prev,
+        weightEntries: updatedEntries
+      };
+    });
   };
 
-  const calculateWeeklyChange = () => {
-    const entries = formData.weightEntries;
-    if (entries.length < 2) return null;
+  const calculateWeightStats = () => {
+    if (formData.weightEntries.length === 0) return null;
 
-    const weekInMs = 7 * 24 * 60 * 60 * 1000;
-    const latestEntry = entries[entries.length - 1];
-    const weekAgoDate = new Date(new Date(latestEntry.date).getTime() - weekInMs);
+    const sortedEntries = [...formData.weightEntries]
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    const initialWeight = sortedEntries[0].weight;
+    const currentWeight = sortedEntries[sortedEntries.length - 1].weight;
+    const totalChange = currentWeight - initialWeight;
     
-    const weekAgoEntry = entries.reduce((closest, entry) => {
-      const entryDate = new Date(entry.date);
-      const closestDate = new Date(closest.date);
-      const targetDiff = Math.abs(weekAgoDate.getTime() - entryDate.getTime());
-      const closestDiff = Math.abs(weekAgoDate.getTime() - closestDate.getTime());
-      return targetDiff < closestDiff ? entry : closest;
-    }, entries[0]);
+    // Calculate weekly average change
+    const firstDate = new Date(sortedEntries[0].date);
+    const lastDate = new Date(sortedEntries[sortedEntries.length - 1].date);
+    const weeksDiff = Math.max(1, Math.round((lastDate.getTime() - firstDate.getTime()) / (7 * 24 * 60 * 60 * 1000)));
+    const weeklyChange = totalChange / weeksDiff;
 
     return {
-      change: (latestEntry.weight - weekAgoEntry.weight).toFixed(1),
-      startDate: weekAgoEntry.date,
-      endDate: latestEntry.date
+      initialWeight,
+      currentWeight,
+      totalChange,
+      weeklyChange,
+      trend: totalChange === 0 ? 'maintained' : totalChange > 0 ? 'gained' : 'lost'
     };
   };
 
@@ -299,7 +320,7 @@ function App() {
 
     if (daysSinceCheck < 14) return null;
 
-    const weeklyChange = Number(calculateWeeklyChange()?.change || 0);
+    const weeklyChange = Number(calculateWeightStats()?.weeklyChange || 0);
     const targetChange = formData.goal === 'lose' ? 
       (formData.rate === 'slow' ? -0.25 : formData.rate === 'moderate' ? -0.5 : -0.75) :
       formData.goal === 'gain' ?
@@ -536,7 +557,6 @@ function App() {
         if (!calories) return null;
         const adjustedCalories = calories + getCalorieAdjustment();
         const activityLevel = ACTIVITY_LEVELS[formData.activityLevel as keyof typeof ACTIVITY_LEVELS];
-        const weeklyProgress = calculateWeeklyChange();
         const metabolismStatus = checkMetabolism();
         
         return (
@@ -634,102 +654,66 @@ function App() {
   );
 
   const renderWeightTracker = () => {
-    if (!formData.hasCompletedCalculator) {
-      return (
-        <div className="tracker-container">
-          <div className="empty-state">
-            <h2>Complete the Calculator First</h2>
-            <p>Please complete the calorie calculator before tracking your weight.</p>
-            <button 
-              onClick={() => setCurrentView('calculator')} 
-              className="nav-btn next-btn"
-            >
-              Go to Calculator
-              <FaArrowRight size={20} />
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    const weeklyProgress = calculateWeeklyChange();
-    const metabolismStatus = checkMetabolism();
-    const today = new Date().toISOString().split('T')[0];
-    const canAddWeight = !formData.weightEntries.some(entry => entry.date === today);
+    const stats = calculateWeightStats();
+    const sortedEntries = [...formData.weightEntries]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
-      <div className="tracker-container">
+      <div className="weight-tracking">
         <h2>Weight Tracker</h2>
         
-        {canAddWeight && (
-          <div className="weight-input-section">
-            <h3>Add Today's Weight</h3>
-            <div className="weight-input">
-              <input
-                type="number"
-                step="0.1"
-                placeholder="Enter your weight"
-                onChange={(e) => {
-                  const weight = parseFloat(e.target.value);
-                  if (weight > 0) addWeightEntry(weight);
-                }}
-              />
-              <span className="unit">kg</span>
+        <div className="weight-input-section">
+          <div className="weight-input">
+            <input
+              type="number"
+              step="0.1"
+              placeholder="Enter your weight"
+              onChange={(e) => {
+                const weight = parseFloat(e.target.value);
+                if (!isNaN(weight) && weight > 0) {
+                  addWeightEntry(weight);
+                }
+              }}
+            />
+          </div>
+        </div>
+
+        {stats && (
+          <div className="weight-stats">
+            <div className="stat-card">
+              <div className="stat-label">Initial Weight</div>
+              <div className="stat-value">{stats.initialWeight.toFixed(1)} kg</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Current Weight</div>
+              <div className="stat-value">{stats.currentWeight.toFixed(1)} kg</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Total Change</div>
+              <div className="stat-value" style={{ color: stats.totalChange === 0 ? 'inherit' : stats.totalChange > 0 ? 'var(--warning-color)' : 'var(--success-color)' }}>
+                {stats.totalChange > 0 ? '+' : ''}{stats.totalChange.toFixed(1)} kg
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Weekly Change</div>
+              <div className="stat-value" style={{ color: stats.weeklyChange === 0 ? 'inherit' : stats.weeklyChange > 0 ? 'var(--warning-color)' : 'var(--success-color)' }}>
+                {stats.weeklyChange > 0 ? '+' : ''}{stats.weeklyChange.toFixed(2)} kg/week
+              </div>
             </div>
           </div>
         )}
 
-        {formData.weightEntries.length > 0 && (
-          <>
-            <div className="weight-stats">
-              <div className="stat-card">
-                <span className="stat-label">Latest Weight</span>
-                <span className="stat-value">
-                  {formData.weightEntries[formData.weightEntries.length - 1].weight} kg
-                </span>
+        <div className="weight-history">
+          <h3>History</h3>
+          <div className="history-list">
+            {sortedEntries.map((entry, index) => (
+              <div key={entry.date} className="history-item">
+                <div className="history-date">{new Date(entry.date).toLocaleDateString()}</div>
+                <div className="history-weight">{entry.weight.toFixed(1)} kg</div>
               </div>
-              {weeklyProgress && (
-                <div className="stat-card">
-                  <span className="stat-label">Weekly Change</span>
-                  <span className="stat-value">
-                    {Number(weeklyProgress.change) > 0 ? '+' : ''}{weeklyProgress.change} kg
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {metabolismStatus && (
-              <div className="metabolism-info">
-                <h4>Metabolism Check</h4>
-                <div className={`metabolism-status ${metabolismStatus.isOnTrack ? 'status-good' : 'status-warning'}`}>
-                  <span className="status-icon">
-                    {metabolismStatus.isOnTrack ? '✅' : '⚠️'}
-                  </span>
-                  <span>{metabolismStatus.message}</span>
-                </div>
-              </div>
-            )}
-
-            <div className="weight-history">
-              <h3>Weight History</h3>
-              <div className="history-list">
-                {formData.weightEntries.slice().reverse().map((entry, index) => (
-                  <div key={entry.date} className="history-item">
-                    <span className="history-date">
-                      {new Date(entry.date).toLocaleDateString(undefined, {
-                        weekday: 'short',
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </span>
-                    <span className="history-weight">{entry.weight} kg</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
+            ))}
+          </div>
+        </div>
       </div>
     );
   };
