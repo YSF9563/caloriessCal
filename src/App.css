@@ -126,7 +126,7 @@ body::before {
   width: 100%;
   max-width: 800px;
   margin: auto;
-  padding: 3.5rem 2rem 2rem;
+  padding: 2rem 1.5rem 1.5rem;
   background: var(--glass-background);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
@@ -187,14 +187,14 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
   color: var(--text-color);
 }
 
 .header svg {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
 }
 
 h1 {
@@ -207,14 +207,14 @@ h1 {
 }
 
 .progress-bar {
-  margin: 1.5rem 0 2rem;
+  margin: 1rem 0 1.5rem;
 }
 
 .progress-steps {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 500px;
+  max-width: 400px;
   margin: 0 auto;
   position: relative;
 }
@@ -232,8 +232,8 @@ h1 {
 }
 
 .progress-step {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--card-background);
   backdrop-filter: blur(8px);
@@ -248,6 +248,7 @@ h1 {
   transition: var(--transition);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  font-size: 0.9rem;
 }
 
 .progress-step::after {
@@ -307,11 +308,11 @@ h2 {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
   background: var(--card-background);
   backdrop-filter: blur(8px);
   border: var(--glass-border);
-  padding: 1.2rem;
+  padding: 1rem;
   border-radius: var(--border-radius);
   transition: var(--transition);
 }
@@ -335,10 +336,10 @@ label svg {
 }
 
 input {
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  font-size: 1.1rem;
+  font-size: 1rem;
   background: var(--input-background);
   color: var(--text-color);
   transition: var(--transition);
@@ -395,41 +396,41 @@ input:focus {
 
 .question-card {
   background: var(--card-background);
-  padding: 1.5rem;
+  padding: 1.25rem;
   border-radius: var(--border-radius);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   box-shadow: var(--box-shadow);
-  max-width: 600px;
+  max-width: 100%;
   margin: 0 auto;
   border: var(--glass-border);
 }
 
 .question-card h3 {
-  font-size: 1.4rem;
-  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
   color: var(--text-color);
 }
 
 .options-grid {
   display: grid;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .option-btn {
   background: var(--card-background);
   backdrop-filter: blur(8px);
   border: var(--glass-border);
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1rem;
   border-radius: var(--border-radius);
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--text-color);
   transition: var(--transition);
   width: 100%;
   text-align: left;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   position: relative;
   overflow: hidden;
 }
@@ -480,14 +481,14 @@ input:focus {
 .goal-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: 0.75rem;
   max-width: 600px;
-  margin: 0 auto 2rem;
+  margin: 0.75rem auto;
 }
 
 .goal-option {
   position: relative;
-  padding: 1.5rem;
+  padding: 1rem;
   border: var(--glass-border);
   border-radius: var(--border-radius);
   cursor: pointer;
@@ -508,8 +509,8 @@ input:focus {
 }
 
 .goal-icon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
   display: block;
 }
 
@@ -520,14 +521,14 @@ input:focus {
 .rate-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: 0.75rem;
   max-width: 600px;
-  margin: 1rem auto 0;
+  margin: 0.75rem auto;
 }
 
 .rate-option {
   position: relative;
-  padding: 1.5rem;
+  padding: 1rem;
   border: var(--glass-border);
   border-radius: var(--border-radius);
   cursor: pointer;
@@ -584,22 +585,22 @@ input:focus {
 }
 
 .calories-circle {
-  width: 180px;
-  height: 180px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 1rem auto;
+  margin: 0.75rem auto;
   position: relative;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   animation: float 6s ease-in-out infinite;
 }
 
 .calories-number {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 800;
   color: white;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -616,7 +617,7 @@ input:focus {
 .macros-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: 0.75rem;
   max-width: 500px;
   margin: 1.5rem auto;
 }
@@ -672,7 +673,7 @@ input:focus {
 }
 
 .macro-value {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: var(--primary-light);
   line-height: 1;
@@ -805,7 +806,7 @@ input:focus {
   }
 
   .calculator-container {
-    padding: 3rem 1rem 1.5rem;
+    padding: 2rem 1rem 1rem;
     margin: 0;
     min-height: calc(100vh - 1rem);
   }
@@ -838,8 +839,9 @@ input:focus {
   .goal-options,
   .rate-options,
   .macros-grid {
-    padding: 0;
-    gap: 1rem;
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    margin: 0 auto;
   }
 
   .form-group {
@@ -847,17 +849,17 @@ input:focus {
   }
 
   input {
-    padding: 0.8rem;
+    padding: 0.75rem;
     font-size: 1rem;
   }
 
   .calories-circle {
-    width: 180px;
-    height: 180px;
+    width: 150px;
+    height: 150px;
   }
 
   .calories-number {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
 
   .nav-btn {
@@ -870,7 +872,7 @@ input:focus {
   }
 
   .macro-value {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 
   .results-info {
@@ -894,7 +896,7 @@ input:focus {
 
 @media (max-width: 480px) {
   .calculator-container {
-    padding: 3rem 0.75rem 1rem;
+    padding: 1.5rem 0.75rem 1rem;
     border-radius: 0;
   }
 
@@ -904,7 +906,7 @@ input:focus {
   }
 
   .progress-steps {
-    max-width: 280px;
+    max-width: 250px;
   }
 
   .progress-step {
@@ -924,12 +926,12 @@ input:focus {
   }
 
   .calories-circle {
-    width: 150px;
-    height: 150px;
+    width: 130px;
+    height: 130px;
   }
 
   .calories-number {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .calories-unit {
@@ -945,7 +947,7 @@ input:focus {
   }
 
   .macro-value {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
   }
 
   .info-text {
@@ -959,7 +961,7 @@ input:focus {
   .form-group,
   .weight-input-section,
   .stat-card {
-    padding: 0.75rem;
+    padding: 1rem;
   }
 }
 
@@ -1020,7 +1022,7 @@ input:focus {
   align-items: center;
   margin-bottom: 2rem;
   background: var(--card-background);
-  padding: 1.5rem;
+  padding: 1.25rem;
   border-radius: var(--border-radius);
   border: var(--glass-border);
 }
@@ -1032,12 +1034,12 @@ input:focus {
 
 .weight-input input {
   width: 100%;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   background: var(--input-background);
   color: var(--text-color);
-  font-size: 1.1rem;
+  font-size: 1rem;
   transition: var(--transition);
 }
 
@@ -1056,7 +1058,7 @@ input:focus {
 
 .stat-card {
   background: var(--card-background);
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: var(--border-radius);
   border: var(--glass-border);
   transition: var(--transition);
@@ -1076,7 +1078,7 @@ input:focus {
 
 .stat-value {
   color: var(--text-color);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
 }
 
@@ -1253,8 +1255,8 @@ input:focus {
   display: flex;
   justify-content: center;
   gap: 1rem;
-  margin-bottom: 2rem;
-  padding: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.4rem;
   background: var(--card-background);
   backdrop-filter: blur(8px);
   border-radius: 100px;
@@ -1266,7 +1268,7 @@ input:focus {
 .nav-item {
   position: relative;
   overflow: hidden;
-  padding: 1rem 2rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 100px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -1279,6 +1281,7 @@ input:focus {
   background: var(--input-background);
   border: 1px solid var(--border-color);
   opacity: 0.9;
+  font-size: 0.95rem;
 }
 
 .nav-item:hover {
@@ -1310,9 +1313,9 @@ input:focus {
 
 .weight-input-section {
   background: var(--card-background);
-  padding: 2rem;
+  padding: 1.25rem;
   border-radius: var(--border-radius);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
@@ -1327,8 +1330,8 @@ input:focus {
 
 .weight-input input {
   flex: 1;
-  padding: 1.2rem;
-  font-size: 1.2rem;
+  padding: 0.75rem;
+  font-size: 1rem;
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--border-radius);
   background: var(--input-background);
@@ -1355,7 +1358,7 @@ input:focus {
   background: var(--card-background);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: var(--border-radius);
   border: 1px solid var(--border-color);
   display: flex;
@@ -1376,7 +1379,7 @@ input:focus {
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--primary-color);
 }
@@ -1630,5 +1633,72 @@ input:focus {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Ensure proper spacing between elements */
+.form-group + .form-group,
+.question-card + .question-card,
+.macro-card + .macro-card {
+  margin-top: 0.75rem;
+}
+
+/* Adjust activity level section specifically */
+.activity-test-step {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.activity-test-step .question-card {
+  background: var(--card-background);
+  border: var(--glass-border);
+  margin-bottom: 1rem;
+}
+
+.activity-test-step .options-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.activity-test-step .option-btn {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Ensure content doesn't overflow on very small screens */
+@media (max-width: 360px) {
+  .calculator-container {
+    padding: 1.25rem 0.5rem 0.75rem;
+  }
+
+  .progress-steps {
+    max-width: 220px;
+  }
+
+  .progress-step {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+
+  .nav-item {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .form-group,
+  .weight-input-section,
+  .stat-card {
+    padding: 0.75rem;
+  }
+
+  input {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
   }
 }
