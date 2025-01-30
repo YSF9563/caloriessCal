@@ -103,36 +103,28 @@ type View = 'calculator' | 'tracker';
 
 function App() {
   const [step, setStep] = useState(1);
+  
+  // Clear all stored data on initial load
+  useEffect(() => {
+    localStorage.clear(); // Clear all localStorage data
+  }, []);
+
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      return savedTheme === 'dark';
-    }
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
-  const [formData, setFormData] = useState<FormData>(() => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    const defaultData = {
-      age: 0,
-      weight: 0,
-      height: 0,
-      gender: 'male',
-      activityLevel: 'sedentary',
-      goal: 'maintain',
-      rate: 'moderate',
-      weightEntries: [],
-      startDate: new Date().toISOString().split('T')[0],
-      lastMetabolismCheck: new Date().toISOString().split('T')[0],
-      hasCompletedCalculator: false
-    };
-
-    if (savedData) {
-      const parsedData = JSON.parse(savedData);
-      // Only restore saved data if the calculator was completed (calories were calculated)
-      return parsedData.hasCompletedCalculator ? parsedData : defaultData;
-    }
-    return defaultData;
+  const [formData, setFormData] = useState<FormData>({
+    age: 0,
+    weight: 0,
+    height: 0,
+    gender: 'male',
+    activityLevel: 'sedentary',
+    goal: 'maintain',
+    rate: 'moderate',
+    weightEntries: [],
+    startDate: new Date().toISOString().split('T')[0],
+    lastMetabolismCheck: new Date().toISOString().split('T')[0],
+    hasCompletedCalculator: false
   });
 
   const [activityAnswers, setActivityAnswers] = useState<number[]>([]);
@@ -140,25 +132,27 @@ function App() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [currentView, setCurrentView] = useState<View>('calculator');
 
+  // Update theme based on system preference changes
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      if (!localStorage.getItem('theme')) {
-        setIsDarkMode(e.matches);
-      }
+      setIsDarkMode(e.matches);
     };
     
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
+  // Apply theme changes without saving to localStorage
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
 
+  // Save form data changes
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    if (formData.hasCompletedCalculator) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    }
   }, [formData]);
 
   const calculateActivityLevel = (points: number) => {
@@ -253,10 +247,6 @@ function App() {
     e.preventDefault();
     if (step === 4) {
       calculateCalories();
-      // Set initial weight from calculator when completing it
-      if (!formData.weightEntries.length) {
-        addWeightEntry(formData.weight);
-      }
       setStep(5);
     }
   };
@@ -664,7 +654,7 @@ function App() {
         <div className="tracker-container">
           <div className="empty-state">
             <h2>Complete the Calculator First</h2>
-            <p>Please complete the calorie calculator to start tracking your weight. Your initial weight from the calculator will be used as your starting point.</p>
+            <p>Please complete the calorie calculator before tracking your weight.</p>
             <button 
               onClick={() => setCurrentView('calculator')} 
               className="nav-btn next-btn"
@@ -679,8 +669,7 @@ function App() {
 
     const stats = calculateWeightStats();
     const today = new Date().toISOString().split('T')[0];
-    const lastEntry = formData.weightEntries[0]; // Most recent entry
-    const canAddWeight = !lastEntry || lastEntry.date !== today;
+    const canAddWeight = !formData.weightEntries.some(entry => entry.date === today);
     const metabolismStatus = checkMetabolism();
 
     return (
@@ -716,7 +705,7 @@ function App() {
                   {formData.weightEntries[0].weight.toFixed(1)} kg
                 </span>
               </div>
-              {stats && formData.weightEntries.length > 1 && (
+              {stats && (
                 <div className="stat-card">
                   <span className="stat-label">Weekly Change</span>
                   <span className="stat-value" style={{ 
@@ -730,7 +719,7 @@ function App() {
               )}
             </div>
 
-            {metabolismStatus && formData.weightEntries.length > 1 && (
+            {metabolismStatus && (
               <div className="metabolism-info">
                 <h4>Metabolism Check</h4>
                 <div className={`metabolism-status ${metabolismStatus.isOnTrack ? 'status-good' : 'status-warning'}`}>
@@ -745,19 +734,22 @@ function App() {
             <div className="weight-history">
               <h3>Weight History</h3>
               <div className="history-list">
-                {formData.weightEntries.map((entry) => (
-                  <div key={entry.date} className="history-item">
-                    <span className="history-date">
-                      {new Date(entry.date).toLocaleDateString(undefined, {
-                        weekday: 'short',
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </span>
-                    <span className="history-weight">{entry.weight.toFixed(1)} kg</span>
-                  </div>
-                ))}
+                {formData.weightEntries
+                  .slice()
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map((entry) => (
+                    <div key={entry.date} className="history-item">
+                      <span className="history-date">
+                        {new Date(entry.date).toLocaleDateString(undefined, {
+                          weekday: 'short',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </span>
+                      <span className="history-weight">{entry.weight.toFixed(1)} kg</span>
+                    </div>
+                  ))}
               </div>
             </div>
           </>
