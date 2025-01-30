@@ -684,10 +684,20 @@ function App() {
                 type="number"
                 step="0.1"
                 placeholder="Enter weight in kg"
-                onChange={(e) => {
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const weight = parseFloat((e.target as HTMLInputElement).value);
+                    if (!isNaN(weight) && weight > 0) {
+                      addWeightEntry(weight);
+                      (e.target as HTMLInputElement).value = '';
+                    }
+                  }
+                }}
+                onBlur={(e) => {
                   const weight = parseFloat(e.target.value);
                   if (!isNaN(weight) && weight > 0) {
                     addWeightEntry(weight);
+                    e.target.value = '';
                   }
                 }}
               />
