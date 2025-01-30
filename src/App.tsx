@@ -1,8 +1,20 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { FaWeight, FaRulerVertical, FaRunning, FaMoon, FaSun, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
+import { FaWeight, FaRulerVertical, FaRunning, FaMoon, FaSun, FaArrowRight, FaArrowLeft, FaCalculator, FaChartLine } from 'react-icons/fa';
 import { BsFillCalendarDateFill, BsGenderAmbiguous, BsFire, BsCheckCircleFill } from 'react-icons/bs';
 import { IoMdFitness } from 'react-icons/io';
+
+interface WeightEntry {
+  date: string;
+  weight: number;
+}
+
+interface WeeklyProgress {
+  startDate: string;
+  endDate: string;
+  weightChange: number;
+  isOnTrack: boolean;
+}
 
 interface FormData {
   age: number;
@@ -12,7 +24,13 @@ interface FormData {
   activityLevel: string;
   goal: 'maintain' | 'lose' | 'gain';
   rate: 'slow' | 'moderate' | 'fast';
+  weightEntries: WeightEntry[];
+  startDate: string;
+  lastMetabolismCheck: string;
+  hasCompletedCalculator: boolean;
 }
+
+const STORAGE_KEY = 'caloriesCalData';
 
 const ACTIVITY_QUESTIONS = [
   {
@@ -81,6 +99,8 @@ const ACTIVITY_LEVELS = {
   }
 };
 
+type View = 'calculator' | 'tracker';
+
 function App() {
   const [step, setStep] = useState(1);
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -88,24 +108,43 @@ function App() {
     return savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
   });
 
-  const [formData, setFormData] = useState<FormData>({
-    age: 0,
-    weight: 0,
-    height: 0,
-    gender: 'male',
-    activityLevel: 'sedentary',
-    goal: 'maintain',
-    rate: 'moderate'
+  const [formData, setFormData] = useState<FormData>(() => {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    const defaultData = {
+      age: 0,
+      weight: 0,
+      height: 0,
+      gender: 'male',
+      activityLevel: 'sedentary',
+      goal: 'maintain',
+      rate: 'moderate',
+      weightEntries: [],
+      startDate: new Date().toISOString().split('T')[0],
+      lastMetabolismCheck: new Date().toISOString().split('T')[0],
+      hasCompletedCalculator: false
+    };
+
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      // Only restore saved data if the calculator was completed (calories were calculated)
+      return parsedData.hasCompletedCalculator ? parsedData : defaultData;
+    }
+    return defaultData;
   });
 
   const [activityAnswers, setActivityAnswers] = useState<number[]>([]);
   const [calories, setCalories] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [currentView, setCurrentView] = useState<View>('calculator');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+  }, [formData]);
 
   const calculateActivityLevel = (points: number) => {
     if (points <= 2) return 'sedentary';
@@ -141,6 +180,8 @@ function App() {
     setTimeout(() => {
       setCalories(Math.round(maintenanceCalories));
       setIsCalculating(false);
+      // Mark calculator as completed when calories are calculated
+      setFormData(prev => ({ ...prev, hasCompletedCalculator: true }));
     }, 500);
   };
 
@@ -173,17 +214,24 @@ function App() {
 
   const handleReset = () => {
     setStep(1);
-    setFormData({
+    const newFormData: FormData = {
       age: 0,
       weight: 0,
       height: 0,
-      gender: 'male',
+      gender: 'male' as const,
       activityLevel: 'sedentary',
-      goal: 'maintain',
-      rate: 'moderate'
-    });
+      goal: 'maintain' as const,
+      rate: 'moderate' as const,
+      weightEntries: [],
+      startDate: new Date().toISOString().split('T')[0],
+      lastMetabolismCheck: new Date().toISOString().split('T')[0],
+      hasCompletedCalculator: false
+    };
+    setFormData(newFormData);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newFormData));
     setActivityAnswers([]);
     setCalories(null);
+    setCurrentView('calculator');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -204,6 +252,76 @@ function App() {
       case 'fast': return baseAdjustment * 750;
       default: return 0;
     }
+  };
+
+  const addWeightEntry = (weight: number) => {
+    const today = new Date().toISOString().split('T')[0];
+    const newEntry = { date: today, weight };
+    setFormData(prev => ({
+      ...prev,
+      weightEntries: [...prev.weightEntries, newEntry].sort((a, b) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      )
+    }));
+    checkMetabolism();
+  };
+
+  const calculateWeeklyChange = () => {
+    const entries = formData.weightEntries;
+    if (entries.length < 2) return null;
+
+    const weekInMs = 7 * 24 * 60 * 60 * 1000;
+    const latestEntry = entries[entries.length - 1];
+    const weekAgoDate = new Date(new Date(latestEntry.date).getTime() - weekInMs);
+    
+    const weekAgoEntry = entries.reduce((closest, entry) => {
+      const entryDate = new Date(entry.date);
+      const closestDate = new Date(closest.date);
+      const targetDiff = Math.abs(weekAgoDate.getTime() - entryDate.getTime());
+      const closestDiff = Math.abs(weekAgoDate.getTime() - closestDate.getTime());
+      return targetDiff < closestDiff ? entry : closest;
+    }, entries[0]);
+
+    return {
+      change: (latestEntry.weight - weekAgoEntry.weight).toFixed(1),
+      startDate: weekAgoEntry.date,
+      endDate: latestEntry.date
+    };
+  };
+
+  const checkMetabolism = () => {
+    const entries = formData.weightEntries;
+    if (entries.length < 14) return null;
+
+    const lastCheck = new Date(formData.lastMetabolismCheck);
+    const today = new Date();
+    const daysSinceCheck = Math.floor((today.getTime() - lastCheck.getTime()) / (24 * 60 * 60 * 1000));
+
+    if (daysSinceCheck < 14) return null;
+
+    const weeklyChange = Number(calculateWeeklyChange()?.change || 0);
+    const targetChange = formData.goal === 'lose' ? 
+      (formData.rate === 'slow' ? -0.25 : formData.rate === 'moderate' ? -0.5 : -0.75) :
+      formData.goal === 'gain' ?
+      (formData.rate === 'slow' ? 0.25 : formData.rate === 'moderate' ? 0.5 : 0.75) : 0;
+
+    const difference = Math.abs(weeklyChange - targetChange);
+    
+    if (difference > 0.2) {
+      const adjustment = Math.round((difference * 500) * (weeklyChange > targetChange ? -1 : 1));
+      setCalories(prev => prev ? prev + adjustment : prev);
+      setFormData(prev => ({ ...prev, lastMetabolismCheck: today.toISOString().split('T')[0] }));
+      return {
+        adjustment,
+        isOnTrack: false,
+        message: `Your metabolism has been adjusted by ${Math.abs(adjustment)} calories ${adjustment > 0 ? 'up' : 'down'}`
+      };
+    }
+    return {
+      adjustment: 0,
+      isOnTrack: true,
+      message: "You're on track with your goals!"
+    };
   };
 
   const renderStep = () => {
@@ -418,6 +536,8 @@ function App() {
         if (!calories) return null;
         const adjustedCalories = calories + getCalorieAdjustment();
         const activityLevel = ACTIVITY_LEVELS[formData.activityLevel as keyof typeof ACTIVITY_LEVELS];
+        const weeklyProgress = calculateWeeklyChange();
+        const metabolismStatus = checkMetabolism();
         
         return (
           <div className="step-content results-step">
@@ -454,6 +574,21 @@ function App() {
               </div>
             </div>
 
+            <div className="weight-tracking">
+              <h3>Weight Tracking</h3>
+              {metabolismStatus && (
+                <div className="metabolism-info">
+                  <h4>Metabolism Check</h4>
+                  <div className={`metabolism-status ${metabolismStatus.isOnTrack ? 'status-good' : 'status-warning'}`}>
+                    <span className="status-icon">
+                      {metabolismStatus.isOnTrack ? '✅' : '⚠️'}
+                    </span>
+                    <span>{metabolismStatus.message}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="results-info">
               <p className="info-text">
                 Based on your {activityLevel.label.toLowerCase()} lifestyle and goal to
@@ -479,6 +614,126 @@ function App() {
     }
   };
 
+  const renderNavigation = () => (
+    <div className="nav-bar">
+      <button 
+        className={`nav-item ${currentView === 'calculator' ? 'active' : ''}`}
+        onClick={() => setCurrentView('calculator')}
+      >
+        <FaCalculator size={20} />
+        <span>Calculator</span>
+      </button>
+      <button 
+        className={`nav-item ${currentView === 'tracker' ? 'active' : ''}`}
+        onClick={() => setCurrentView('tracker')}
+      >
+        <FaChartLine size={20} />
+        <span>Weight Tracker</span>
+      </button>
+    </div>
+  );
+
+  const renderWeightTracker = () => {
+    if (!formData.hasCompletedCalculator) {
+      return (
+        <div className="tracker-container">
+          <div className="empty-state">
+            <h2>Complete the Calculator First</h2>
+            <p>Please complete the calorie calculator before tracking your weight.</p>
+            <button 
+              onClick={() => setCurrentView('calculator')} 
+              className="nav-btn next-btn"
+            >
+              Go to Calculator
+              <FaArrowRight size={20} />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    const weeklyProgress = calculateWeeklyChange();
+    const metabolismStatus = checkMetabolism();
+    const today = new Date().toISOString().split('T')[0];
+    const canAddWeight = !formData.weightEntries.some(entry => entry.date === today);
+
+    return (
+      <div className="tracker-container">
+        <h2>Weight Tracker</h2>
+        
+        {canAddWeight && (
+          <div className="weight-input-section">
+            <h3>Add Today's Weight</h3>
+            <div className="weight-input">
+              <input
+                type="number"
+                step="0.1"
+                placeholder="Enter your weight"
+                onChange={(e) => {
+                  const weight = parseFloat(e.target.value);
+                  if (weight > 0) addWeightEntry(weight);
+                }}
+              />
+              <span className="unit">kg</span>
+            </div>
+          </div>
+        )}
+
+        {formData.weightEntries.length > 0 && (
+          <>
+            <div className="weight-stats">
+              <div className="stat-card">
+                <span className="stat-label">Latest Weight</span>
+                <span className="stat-value">
+                  {formData.weightEntries[formData.weightEntries.length - 1].weight} kg
+                </span>
+              </div>
+              {weeklyProgress && (
+                <div className="stat-card">
+                  <span className="stat-label">Weekly Change</span>
+                  <span className="stat-value">
+                    {Number(weeklyProgress.change) > 0 ? '+' : ''}{weeklyProgress.change} kg
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {metabolismStatus && (
+              <div className="metabolism-info">
+                <h4>Metabolism Check</h4>
+                <div className={`metabolism-status ${metabolismStatus.isOnTrack ? 'status-good' : 'status-warning'}`}>
+                  <span className="status-icon">
+                    {metabolismStatus.isOnTrack ? '✅' : '⚠️'}
+                  </span>
+                  <span>{metabolismStatus.message}</span>
+                </div>
+              </div>
+            )}
+
+            <div className="weight-history">
+              <h3>Weight History</h3>
+              <div className="history-list">
+                {formData.weightEntries.slice().reverse().map((entry, index) => (
+                  <div key={entry.date} className="history-item">
+                    <span className="history-date">
+                      {new Date(entry.date).toLocaleDateString(undefined, {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </span>
+                    <span className="history-weight">{entry.weight} kg</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="calculator-container">
       <div className="theme-toggle">
@@ -491,59 +746,67 @@ function App() {
         </button>
       </div>
       
-      <div className="header">
-        <IoMdFitness size={48} />
-        <h1>Calorie Calculator</h1>
-      </div>
-
-      <div className="progress-bar">
-        <div className="progress-steps">
-          {[1, 2, 3, 4, 5].map((stepNumber) => (
-            <div
-              key={stepNumber}
-              className={`progress-step ${step >= stepNumber ? 'active' : ''} ${
-                step === stepNumber ? 'current' : ''
-              }`}
-            >
-              {step > stepNumber ? <BsCheckCircleFill size={24} /> : stepNumber}
-            </div>
-          ))}
-        </div>
-      </div>
+      {renderNavigation()}
       
-      <form onSubmit={handleSubmit} className="calculator-form">
-        {renderStep()}
+      {currentView === 'calculator' ? (
+        <>
+          <div className="header">
+            <IoMdFitness size={48} />
+            <h1>Calorie Calculator</h1>
+          </div>
 
-        <div className="form-navigation">
-          {step > 1 && step !== 5 && (
-            <button type="button" onClick={handleBack} className="nav-btn back-btn">
-              <FaArrowLeft size={20} />
-              Back
-            </button>
-          )}
+          <div className="progress-bar">
+            <div className="progress-steps">
+              {[1, 2, 3, 4, 5].map((stepNumber) => (
+                <div
+                  key={stepNumber}
+                  className={`progress-step ${step >= stepNumber ? 'active' : ''} ${
+                    step === stepNumber ? 'current' : ''
+                  }`}
+                >
+                  {step > stepNumber ? <BsCheckCircleFill size={24} /> : stepNumber}
+                </div>
+              ))}
+            </div>
+          </div>
           
-          {step < 4 && (
-            <button
-              type="button"
-              onClick={handleNext}
-              className="nav-btn next-btn"
-              disabled={
-                step === 1 && (!formData.age || !formData.weight || !formData.height)
-              }
-            >
-              Next
-              <FaArrowRight size={20} />
-            </button>
-          )}
+          <form onSubmit={handleSubmit} className="calculator-form">
+            {renderStep()}
 
-          {step === 4 && (
-            <button type="submit" className="nav-btn calculate-btn">
-              <BsFire size={20} />
-              Calculate Plan
-            </button>
-          )}
-        </div>
-      </form>
+            <div className="form-navigation">
+              {step > 1 && step !== 5 && (
+                <button type="button" onClick={handleBack} className="nav-btn back-btn">
+                  <FaArrowLeft size={20} />
+                  Back
+                </button>
+              )}
+              
+              {step < 4 && (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="nav-btn next-btn"
+                  disabled={
+                    step === 1 && (!formData.age || !formData.weight || !formData.height)
+                  }
+                >
+                  Next
+                  <FaArrowRight size={20} />
+                </button>
+              )}
+
+              {step === 4 && (
+                <button type="submit" className="nav-btn calculate-btn">
+                  <BsFire size={20} />
+                  Calculate Plan
+                </button>
+              )}
+            </div>
+          </form>
+        </>
+      ) : (
+        renderWeightTracker()
+      )}
     </div>
   );
 }
