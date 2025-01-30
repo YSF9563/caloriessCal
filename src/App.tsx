@@ -123,7 +123,7 @@ function App() {
       const totalPoints = newAnswers.reduce((a, b) => a + b, 0);
       const level = calculateActivityLevel(totalPoints);
       setFormData(prev => ({ ...prev, activityLevel: level }));
-      setStep(4); // Move to goal selection
+      setStep(4);
     }
   };
 
@@ -157,6 +157,8 @@ function App() {
       setStep(2);
     } else if (step === 2) {
       setStep(3);
+    } else if (step === 3) {
+      setStep(4);
     }
   };
 
@@ -169,10 +171,27 @@ function App() {
     }
   };
 
+  const handleReset = () => {
+    setStep(1);
+    setFormData({
+      age: 0,
+      weight: 0,
+      height: 0,
+      gender: 'male',
+      activityLevel: 'sedentary',
+      goal: 'maintain',
+      rate: 'moderate'
+    });
+    setActivityAnswers([]);
+    setCalories(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    calculateCalories();
-    setStep(5);
+    if (step === 4) {
+      calculateCalories();
+      setStep(5);
+    }
   };
 
   const getCalorieAdjustment = () => {
@@ -317,7 +336,7 @@ function App() {
           <div className="step-content goal-step">
             <h2>Select Your Goal</h2>
             <div className="goal-options">
-              <div className={`goal-option ${formData.goal === 'lose' ? 'selected' : ''}`}>
+              <label className={`goal-option ${formData.goal === 'lose' ? 'selected' : ''}`}>
                 <input
                   type="radio"
                   name="goal"
@@ -327,8 +346,8 @@ function App() {
                 />
                 <span className="goal-icon">⬇️</span>
                 <span className="goal-label">Lose Weight</span>
-              </div>
-              <div className={`goal-option ${formData.goal === 'maintain' ? 'selected' : ''}`}>
+              </label>
+              <label className={`goal-option ${formData.goal === 'maintain' ? 'selected' : ''}`}>
                 <input
                   type="radio"
                   name="goal"
@@ -338,8 +357,8 @@ function App() {
                 />
                 <span className="goal-icon">⚖️</span>
                 <span className="goal-label">Maintain Weight</span>
-              </div>
-              <div className={`goal-option ${formData.goal === 'gain' ? 'selected' : ''}`}>
+              </label>
+              <label className={`goal-option ${formData.goal === 'gain' ? 'selected' : ''}`}>
                 <input
                   type="radio"
                   name="goal"
@@ -349,7 +368,7 @@ function App() {
                 />
                 <span className="goal-icon">⬆️</span>
                 <span className="goal-label">Gain Weight</span>
-              </div>
+              </label>
             </div>
 
             {formData.goal !== 'maintain' && (
@@ -365,7 +384,7 @@ function App() {
                       onChange={handleInputChange}
                     />
                     <span className="rate-label">Slow</span>
-                    <span className="rate-value">0.25 kg/week</span>
+                    <span className="rate-value">{formData.goal === 'lose' ? '-0.25' : '+0.25'} kg/week</span>
                   </label>
                   <label className={`rate-option ${formData.rate === 'moderate' ? 'selected' : ''}`}>
                     <input
@@ -376,7 +395,7 @@ function App() {
                       onChange={handleInputChange}
                     />
                     <span className="rate-label">Moderate</span>
-                    <span className="rate-value">0.5 kg/week</span>
+                    <span className="rate-value">{formData.goal === 'lose' ? '-0.5' : '+0.5'} kg/week</span>
                   </label>
                   <label className={`rate-option ${formData.rate === 'fast' ? 'selected' : ''}`}>
                     <input
@@ -387,7 +406,7 @@ function App() {
                       onChange={handleInputChange}
                     />
                     <span className="rate-label">Fast</span>
-                    <span className="rate-value">0.75 kg/week</span>
+                    <span className="rate-value">{formData.goal === 'lose' ? '-0.75' : '+0.75'} kg/week</span>
                   </label>
                 </div>
               </div>
@@ -445,6 +464,13 @@ function App() {
                          formData.rate === 'moderate' ? '0.5' : '0.75'} kg per week`}.
               </p>
             </div>
+
+            <div className="results-actions">
+              <button type="button" onClick={handleReset} className="nav-btn reset-btn">
+                <FaArrowLeft size={20} />
+                Start Over
+              </button>
+            </div>
           </div>
         );
 
@@ -496,7 +522,7 @@ function App() {
             </button>
           )}
           
-          {step < 3 && (
+          {step < 4 && (
             <button
               type="button"
               onClick={handleNext}
@@ -511,9 +537,9 @@ function App() {
           )}
 
           {step === 4 && (
-            <button type="submit" className="nav-btn calculate-btn" disabled={isCalculating}>
+            <button type="submit" className="nav-btn calculate-btn">
               <BsFire size={20} />
-              {isCalculating ? 'Calculating...' : 'Calculate Plan'}
+              Calculate Plan
             </button>
           )}
         </div>

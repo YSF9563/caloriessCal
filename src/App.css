@@ -1,7 +1,7 @@
 #root {
-  max-width: 1280px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   text-align: center;
 }
 
@@ -42,41 +42,37 @@
 }
 
 :root {
-  --primary-color: #4a90e2;
-  --primary-dark: #357abd;
-  --primary-light: #6ba7e5;
+  --primary-color: #4361ee;
+  --primary-dark: #3730a3;
+  --primary-light: #818cf8;
   --secondary-color: #2c3e50;
-  --background-color: #f5f6fa;
+  --background-color: #f8fafc;
   --card-background: #ffffff;
-  --text-color: #2c3e50;
-  --text-secondary: #666;
-  --border-color: #e1e8ed;
-  --border-radius: 16px;
+  --text-color: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --border-radius: 20px;
   --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  --gradient: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
-  --success-color: #4caf50;
-  --warning-color: #ff9800;
-  --danger-color: #f44336;
-  --info-color: #2196f3;
+  --gradient: linear-gradient(135deg, #4361ee 0%, #3730a3 100%);
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --info-color: #3b82f6;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-theme='dark'] {
-  --primary-color: #60a5fa;
-  --primary-dark: #3b82f6;
-  --primary-light: #93c5fd;
-  --secondary-color: #e2e8f0;
-  --background-color: #111827;
-  --card-background: #1f2937;
-  --text-color: #e2e8f0;
-  --text-secondary: #9ca3af;
-  --border-color: #374151;
+  --primary-color: #818cf8;
+  --primary-dark: #6366f1;
+  --primary-light: #a5b4fc;
+  --secondary-color: #f1f5f9;
+  --background-color: #0f172a;
+  --card-background: #1e293b;
+  --text-color: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --border-color: #334155;
   --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  --gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-  --success-color: #81c784;
-  --warning-color: #ffb74d;
-  --danger-color: #e57373;
-  --info-color: #64b5f6;
+  --gradient: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
 }
 
 * {
@@ -100,22 +96,24 @@ body {
 
 .calculator-container {
   width: 100%;
-  max-width: 1000px;
+  max-width: 800px;
   margin: auto;
-  padding: 2rem;
+  padding: 2.5rem 2rem;
   background: var(--card-background);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
   position: relative;
   transition: var(--transition);
   animation: fadeIn 0.5s ease-out;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .theme-toggle {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-  z-index: 10;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 100;
 }
 
 .theme-toggle-btn {
@@ -123,7 +121,7 @@ body {
   border: 2px solid var(--border-color);
   color: var(--text-color);
   cursor: pointer;
-  padding: 0.75rem;
+  padding: 0.6rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -142,16 +140,17 @@ body {
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   color: var(--text-color);
 }
 
 .header svg {
-  color: var(--primary-color);
+  width: 36px;
+  height: 36px;
 }
 
 h1 {
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
   font-weight: 800;
   margin: 0;
   background: var(--gradient);
@@ -160,14 +159,14 @@ h1 {
 }
 
 .progress-bar {
-  margin: 2rem 0 3rem;
+  margin: 1.5rem 0 2rem;
 }
 
 .progress-steps {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 600px;
+  max-width: 500px;
   margin: 0 auto;
   position: relative;
 }
@@ -185,8 +184,8 @@ h1 {
 }
 
 .progress-step {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--card-background);
   border: 2px solid var(--border-color);
@@ -198,17 +197,19 @@ h1 {
   position: relative;
   z-index: 2;
   transition: var(--transition);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .progress-step.active {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
+  background: var(--gradient);
+  border-color: transparent;
   color: white;
+  transform: scale(1.05);
 }
 
 .progress-step.current {
   transform: scale(1.2);
-  box-shadow: 0 0 0 4px var(--primary-light);
+  box-shadow: 0 0 20px var(--primary-light);
 }
 
 .step-content {
@@ -225,8 +226,8 @@ h1 {
 }
 
 h2 {
-  font-size: 1.8rem;
-  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
   text-align: center;
   color: var(--text-color);
 }
@@ -234,13 +235,24 @@ h2 {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
+  gap: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  background: var(--background-color);
+  padding: 1.2rem;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+}
+
+.form-group:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow);
 }
 
 label {
@@ -256,8 +268,7 @@ label svg {
   color: var(--primary-color);
 }
 
-input,
-select {
+input {
   padding: 1rem;
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -265,10 +276,10 @@ select {
   background: var(--card-background);
   color: var(--text-color);
   transition: var(--transition);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-input:focus,
-select:focus {
+input:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 4px var(--primary-light);
@@ -277,13 +288,14 @@ select:focus {
 .gender-options {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  margin-top: 2rem;
+  gap: 1.5rem;
+  max-width: 500px;
+  margin: 1.5rem auto 0;
 }
 
 .gender-option {
   position: relative;
-  padding: 2rem;
+  padding: 1.5rem;
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
   cursor: pointer;
@@ -304,7 +316,7 @@ select:focus {
 }
 
 .gender-icon {
-  font-size: 3rem;
+  font-size: 2.5rem;
   margin-bottom: 1rem;
   display: block;
 }
@@ -316,10 +328,12 @@ select:focus {
 
 .question-card {
   background: var(--card-background);
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: var(--border-radius);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   box-shadow: var(--box-shadow);
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .question-card h3 {
@@ -334,19 +348,44 @@ select:focus {
 }
 
 .option-btn {
-  padding: 1rem;
-  border: 2px solid var(--border-color);
-  border-radius: var(--border-radius);
   background: var(--card-background);
-  color: var(--text-color);
-  font-size: 1.1rem;
+  border: 2px solid var(--border-color);
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius);
   cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-color);
   transition: var(--transition);
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .option-btn:hover {
+  transform: translateY(-2px);
   border-color: var(--primary-color);
-  transform: translateX(5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.option-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient);
+  opacity: 0;
+  transition: var(--transition);
+  z-index: 0;
+}
+
+.option-btn:hover::before {
+  opacity: 0.1;
 }
 
 .progress-dots {
@@ -372,13 +411,14 @@ select:focus {
 .goal-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto 2rem;
 }
 
 .goal-option {
   position: relative;
-  padding: 2rem;
+  padding: 1.5rem;
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
   cursor: pointer;
@@ -411,8 +451,9 @@ select:focus {
 .rate-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-top: 1.5rem;
+  gap: 1rem;
+  max-width: 600px;
+  margin: 1rem auto 0;
 }
 
 .rate-option {
@@ -451,101 +492,132 @@ select:focus {
 
 .results-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .activity-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   background: var(--primary-color);
   color: white;
   border-radius: 100px;
   font-weight: 600;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
 }
 
 .calories-display {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .calories-circle {
-  width: 250px;
-  height: 250px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   background: var(--gradient);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
-  color: white;
-  box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
+  margin: 1rem auto;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   animation: pulse 2s infinite;
 }
 
 .calories-number {
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   font-weight: 800;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   line-height: 1;
+  margin-bottom: 0.25rem;
 }
 
 .calories-unit {
-  font-size: 1.2rem;
-  opacity: 0.8;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
 }
 
 .macros-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  margin: 3rem 0;
+  gap: 1rem;
+  max-width: 500px;
+  margin: 1.5rem auto;
 }
 
 .macro-card {
   background: var(--card-background);
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: var(--border-radius);
-  text-align: center;
-  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
   transition: var(--transition);
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.macro-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--gradient);
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.macro-card:hover::before {
+  opacity: 1;
 }
 
 .macro-card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .macro-icon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .macro-label {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: var(--text-secondary);
+  color: var(--text-color);
 }
 
 .macro-value {
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 800;
   color: var(--primary-color);
+  line-height: 1;
 }
 
 .results-info {
   text-align: center;
-  margin-top: 2rem;
-  padding: 2rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
   background: var(--background-color);
   border-radius: var(--border-radius);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .info-text {
-  font-size: 1.1rem;
-  line-height: 1.6;
+  font-size: 0.9rem;
+  line-height: 1.5;
   color: var(--text-secondary);
 }
 
@@ -567,6 +639,8 @@ select:focus {
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .back-btn {
@@ -578,17 +652,37 @@ select:focus {
 .calculate-btn {
   background: var(--gradient);
   color: white;
+  position: relative;
+  overflow: hidden;
 }
 
-.nav-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+.next-btn::after,
+.calculate-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.2), transparent);
+  opacity: 0;
+  transition: var(--transition);
 }
 
-.nav-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
+.next-btn:hover::after,
+.calculate-btn:hover::after {
+  opacity: 1;
+}
+
+.reset-btn {
+  background: var(--danger-color);
+  color: white;
+}
+
+.results-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
 }
 
 @keyframes fadeIn {
@@ -626,25 +720,36 @@ select:focus {
 /* Responsive Design */
 @media (max-width: 768px) {
   body {
-    padding: 0;
+    padding: 0.5rem;
   }
 
   .calculator-container {
-    min-height: 100vh;
-    margin: 0;
-    border-radius: 0;
-    padding: 1.5rem;
+    padding: 2rem 1rem;
+    margin: 0.5rem;
+    min-height: calc(100vh - 1rem);
   }
 
   .theme-toggle {
-    top: 1rem;
-    right: 1rem;
+    position: fixed;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .theme-toggle-btn {
+    padding: 0.5rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
   }
 
   .progress-step {
-    width: 40px;
-    height: 40px;
-    font-size: 0.9rem;
+    width: 32px;
+    height: 32px;
   }
 
   .form-grid,
@@ -652,13 +757,21 @@ select:focus {
   .goal-options,
   .rate-options,
   .macros-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    padding: 0 0.5rem;
+  }
+
+  .form-group {
+    padding: 1rem;
+  }
+
+  input {
+    padding: 0.8rem;
+    font-size: 1rem;
   }
 
   .calories-circle {
-    width: 200px;
-    height: 200px;
+    width: 180px;
+    height: 180px;
   }
 
   .calories-number {
@@ -666,8 +779,85 @@ select:focus {
   }
 
   .nav-btn {
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  .macro-card {
+    padding: 1.5rem;
+  }
+
+  .macro-value {
+    font-size: 1.5rem;
+  }
+
+  .results-info {
+    padding: 1rem;
+  }
+
+  .info-text {
     font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .calculator-container {
+    padding: 1.5rem 0.75rem;
+    margin: 0;
+  }
+
+  .theme-toggle {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .progress-steps {
+    max-width: 280px;
+  }
+
+  .progress-step {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+
+  .form-navigation {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .nav-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .calories-circle {
+    width: 150px;
+    height: 150px;
+  }
+
+  .calories-number {
+    font-size: 2rem;
+  }
+
+  .calories-unit {
+    font-size: 0.9rem;
+  }
+
+  .macro-card {
+    padding: 0.75rem;
+  }
+
+  .macro-icon {
+    font-size: 1.25rem;
+  }
+
+  .macro-value {
+    font-size: 1.25rem;
+  }
+
+  .info-text {
+    font-size: 0.85rem;
   }
 }
 
