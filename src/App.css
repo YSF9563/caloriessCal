@@ -1305,6 +1305,132 @@ input:focus {
   padding: 2rem;
 }
 
+.weight-input-section {
+  background: rgba(30, 41, 59, 0.6);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.weight-input {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.weight-input input {
+  flex: 1;
+  padding: 1.2rem;
+  font-size: 1.2rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  color: var(--text-color);
+  text-align: center;
+  font-weight: 600;
+}
+
+.weight-input .unit {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: 0 1rem;
+}
+
+.weight-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.stat-card {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px) scale(1.02);
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.weight-history {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: var(--transition);
+  background: rgba(30, 41, 59, 0.4);
+  margin-bottom: 0.5rem;
+  border-radius: var(--border-radius);
+}
+
+.history-item:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.history-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.history-date {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.history-weight {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.weight-history h3 {
+  margin: 2rem 0 1rem;
+  font-size: 1.3rem;
+  color: var(--text-color);
+}
+
 .empty-state {
   text-align: center;
   padding: 3rem 1.5rem;
@@ -1331,18 +1457,79 @@ input:focus {
   margin: 0 auto;
 }
 
-@media (max-width: 480px) {
-  .empty-state {
-    padding: 2rem 1rem;
+.metabolism-info {
+  background: rgba(30, 41, 59, 0.6);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  margin: 1.5rem 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.metabolism-info h4 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.metabolism-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.status-icon {
+  font-size: 1.2rem;
+}
+
+.status-good {
+  color: var(--success-color);
+}
+
+.status-warning {
+  color: var(--warning-color);
+}
+
+@media (max-width: 768px) {
+  .tracker-container {
+    padding: 1rem;
   }
-  
-  .empty-state h2 {
+
+  .weight-input-section {
+    padding: 1.5rem;
+  }
+
+  .weight-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .history-list {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .weight-input {
+    flex-direction: column;
+  }
+
+  .weight-input input {
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 1rem;
+  }
+
+  .stat-card {
+    padding: 1.2rem;
+  }
+
+  .stat-value {
     font-size: 1.3rem;
   }
-  
-  .empty-state p {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
+
+  .history-weight {
+    font-size: 1.1rem;
   }
 }
 
