@@ -1438,11 +1438,13 @@ input:focus {
   backdrop-filter: blur(8px);
   border-radius: var(--border-radius);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  animation: fadeScale 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .empty-state h2 {
   color: var(--text-color);
   margin-bottom: 1rem;
+  font-size: 1.5rem;
 }
 
 .empty-state p {
@@ -1450,6 +1452,30 @@ input:focus {
   margin-bottom: 2rem;
   font-size: 1.1rem;
   line-height: 1.5;
+}
+
+.empty-state .weight-input-section {
+  max-width: 400px;
+  margin: 2rem auto;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.empty-state .weight-input {
+  margin: 0;
+}
+
+.empty-state .weight-input input {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.empty-state .weight-input input:focus {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: var(--primary-color);
+  transform: scale(1.02);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 .empty-state .nav-btn {

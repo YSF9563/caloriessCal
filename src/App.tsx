@@ -253,6 +253,10 @@ function App() {
     e.preventDefault();
     if (step === 4) {
       calculateCalories();
+      // Set initial weight from calculator when completing it
+      if (!formData.weightEntries.length) {
+        addWeightEntry(formData.weight);
+      }
       setStep(5);
     }
   };
@@ -274,8 +278,9 @@ function App() {
     const newEntry: WeightEntry = { date, weight };
     
     setFormData(prev => {
-      // Sort entries by date in descending order
-      const updatedEntries = [...prev.weightEntries, newEntry]
+      // Don't allow multiple entries for the same day
+      const existingEntries = prev.weightEntries.filter(entry => entry.date !== date);
+      const updatedEntries = [...existingEntries, newEntry]
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       
       return {
@@ -659,7 +664,7 @@ function App() {
         <div className="tracker-container">
           <div className="empty-state">
             <h2>Complete the Calculator First</h2>
-            <p>Please complete the calorie calculator before tracking your weight.</p>
+            <p>Please complete the calorie calculator to start tracking your weight. Your initial weight from the calculator will be used as your starting point.</p>
             <button 
               onClick={() => setCurrentView('calculator')} 
               className="nav-btn next-btn"
@@ -674,7 +679,8 @@ function App() {
 
     const stats = calculateWeightStats();
     const today = new Date().toISOString().split('T')[0];
-    const canAddWeight = !formData.weightEntries.some(entry => entry.date === today);
+    const lastEntry = formData.weightEntries[0]; // Most recent entry
+    const canAddWeight = !lastEntry || lastEntry.date !== today;
     const metabolismStatus = checkMetabolism();
 
     return (
@@ -707,10 +713,10 @@ function App() {
               <div className="stat-card">
                 <span className="stat-label">Latest Weight</span>
                 <span className="stat-value">
-                  {formData.weightEntries[formData.weightEntries.length - 1].weight.toFixed(1)} kg
+                  {formData.weightEntries[0].weight.toFixed(1)} kg
                 </span>
               </div>
-              {stats && (
+              {stats && formData.weightEntries.length > 1 && (
                 <div className="stat-card">
                   <span className="stat-label">Weekly Change</span>
                   <span className="stat-value" style={{ 
@@ -724,7 +730,7 @@ function App() {
               )}
             </div>
 
-            {metabolismStatus && (
+            {metabolismStatus && formData.weightEntries.length > 1 && (
               <div className="metabolism-info">
                 <h4>Metabolism Check</h4>
                 <div className={`metabolism-status ${metabolismStatus.isOnTrack ? 'status-good' : 'status-warning'}`}>
@@ -739,22 +745,19 @@ function App() {
             <div className="weight-history">
               <h3>Weight History</h3>
               <div className="history-list">
-                {formData.weightEntries
-                  .slice()
-                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                  .map((entry) => (
-                    <div key={entry.date} className="history-item">
-                      <span className="history-date">
-                        {new Date(entry.date).toLocaleDateString(undefined, {
-                          weekday: 'short',
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </span>
-                      <span className="history-weight">{entry.weight.toFixed(1)} kg</span>
-                    </div>
-                  ))}
+                {formData.weightEntries.map((entry) => (
+                  <div key={entry.date} className="history-item">
+                    <span className="history-date">
+                      {new Date(entry.date).toLocaleDateString(undefined, {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </span>
+                    <span className="history-weight">{entry.weight.toFixed(1)} kg</span>
+                  </div>
+                ))}
               </div>
             </div>
           </>
