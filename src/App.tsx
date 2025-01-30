@@ -290,54 +290,92 @@ function App() {
     const currentWeight = sortedEntries[sortedEntries.length - 1].weight;
     const totalChange = currentWeight - initialWeight;
     
-    // Calculate weekly average change
-    const firstDate = new Date(sortedEntries[0].date);
-    const lastDate = new Date(sortedEntries[sortedEntries.length - 1].date);
-    const weeksDiff = Math.max(1, Math.round((lastDate.getTime() - firstDate.getTime()) / (7 * 24 * 60 * 60 * 1000)));
-    const weeklyChange = totalChange / weeksDiff;
+    // Calculate weekly changes
+    const weeklyChanges: { week: number; change: number; avgWeight: number }[] = [];
+    let currentWeekEntries: WeightEntry[] = [];
+    let weekNumber = 1;
+    
+    sortedEntries.forEach((entry, index) => {
+      const entryDate = new Date(entry.date);
+      const firstDate = new Date(sortedEntries[0].date);
+      const weekDiff = Math.floor((entryDate.getTime() - firstDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+      
+      if (weekDiff + 1 > weekNumber && currentWeekEntries.length > 0) {
+        const avgWeight = currentWeekEntries.reduce((sum, e) => sum + e.weight, 0) / currentWeekEntries.length;
+        const prevWeekAvg = weeklyChanges.length > 0 
+          ? weeklyChanges[weeklyChanges.length - 1].avgWeight 
+          : initialWeight;
+        
+        weeklyChanges.push({
+          week: weekNumber,
+          change: avgWeight - prevWeekAvg,
+          avgWeight
+        });
+        
+        weekNumber = weekDiff + 1;
+        currentWeekEntries = [entry];
+      } else {
+        currentWeekEntries.push(entry);
+      }
+      
+      // Handle last week
+      if (index === sortedEntries.length - 1 && currentWeekEntries.length > 0) {
+        const avgWeight = currentWeekEntries.reduce((sum, e) => sum + e.weight, 0) / currentWeekEntries.length;
+        const prevWeekAvg = weeklyChanges.length > 0 
+          ? weeklyChanges[weeklyChanges.length - 1].avgWeight 
+          : initialWeight;
+        
+        weeklyChanges.push({
+          week: weekNumber,
+          change: avgWeight - prevWeekAvg,
+          avgWeight
+        });
+      }
+    });
+
+    // Calculate average weekly change
+    const totalWeeks = weeklyChanges.length;
+    const avgWeeklyChange = totalWeeks > 0 
+      ? weeklyChanges.reduce((sum, week) => sum + week.change, 0) / totalWeeks
+      : totalChange; // Fallback to total change if less than a week
 
     return {
       initialWeight,
       currentWeight,
       totalChange,
-      weeklyChange,
+      weeklyChanges,
+      avgWeeklyChange,
       trend: totalChange === 0 ? 'maintained' : totalChange > 0 ? 'gained' : 'lost'
     };
   };
 
   const checkMetabolism = () => {
-    const entries = formData.weightEntries;
-    if (entries.length < 14) return null;
+    const stats = calculateWeightStats();
+    if (!stats || !calories) return null;
 
-    const lastCheck = new Date(formData.lastMetabolismCheck);
-    const today = new Date();
-    const daysSinceCheck = Math.floor((today.getTime() - lastCheck.getTime()) / (24 * 60 * 60 * 1000));
-
-    if (daysSinceCheck < 14) return null;
-
-    const weeklyChange = Number(calculateWeightStats()?.weeklyChange || 0);
-    const targetChange = formData.goal === 'lose' ? 
-      (formData.rate === 'slow' ? -0.25 : formData.rate === 'moderate' ? -0.5 : -0.75) :
-      formData.goal === 'gain' ?
-      (formData.rate === 'slow' ? 0.25 : formData.rate === 'moderate' ? 0.5 : 0.75) : 0;
-
-    const difference = Math.abs(weeklyChange - targetChange);
+    const expectedWeeklyChange = getCalorieAdjustment() / 7700; // 7700 calories = 1kg
+    const actualWeeklyChange = stats.avgWeeklyChange;
     
-    if (difference > 0.2) {
-      const adjustment = Math.round((difference * 500) * (weeklyChange > targetChange ? -1 : 1));
-      setCalories(prev => prev ? prev + adjustment : prev);
-      setFormData(prev => ({ ...prev, lastMetabolismCheck: today.toISOString().split('T')[0] }));
-      return {
-        adjustment,
-        isOnTrack: false,
-        message: `Your metabolism has been adjusted by ${Math.abs(adjustment)} calories ${adjustment > 0 ? 'up' : 'down'}`
-      };
+    // Calculate the difference between expected and actual change
+    const changeDifference = Math.abs(actualWeeklyChange - expectedWeeklyChange);
+    const isOnTrack = changeDifference <= 0.2; // Allow 0.2kg/week variance
+    
+    let message = '';
+    if (isOnTrack) {
+      message = 'Your weight change is on track with your calorie goals.';
+    } else {
+      if (formData.goal === 'lose') {
+        message = actualWeeklyChange > expectedWeeklyChange
+          ? 'You might need to reduce your calorie intake or increase activity.'
+          : 'You\'re losing weight faster than expected. Consider increasing calories.';
+      } else if (formData.goal === 'gain') {
+        message = actualWeeklyChange < expectedWeeklyChange
+          ? 'You might need to increase your calorie intake.'
+          : 'You\'re gaining weight faster than expected. Consider reducing calories.';
+      }
     }
-    return {
-      adjustment: 0,
-      isOnTrack: true,
-      message: "You're on track with your goals!"
-    };
+
+    return { isOnTrack, message };
   };
 
   const renderStep = () => {
@@ -684,6 +722,9 @@ function App() {
                 type="number"
                 step="0.1"
                 placeholder="Enter weight in kg"
+                onChange={(e) => {
+                  e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     const weight = parseFloat((e.target as HTMLInputElement).value);
@@ -693,15 +734,20 @@ function App() {
                     }
                   }
                 }}
-                onBlur={(e) => {
-                  const weight = parseFloat(e.target.value);
+              />
+              <button
+                className="add-weight-btn"
+                onClick={(e) => {
+                  const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                  const weight = parseFloat(input.value);
                   if (!isNaN(weight) && weight > 0) {
                     addWeightEntry(weight);
-                    e.target.value = '';
+                    input.value = '';
                   }
                 }}
-              />
-              <span className="unit">kg</span>
+              >
+                Add
+              </button>
             </div>
           </div>
         )}
@@ -717,21 +763,42 @@ function App() {
               </div>
               {stats && (
                 <div className="stat-card">
-                  <span className="stat-label">Weekly Change</span>
+                  <span className="stat-label">Average Weekly Change</span>
                   <span className="stat-value" style={{ 
-                    color: stats.weeklyChange === 0 ? 'inherit' : 
-                           stats.weeklyChange > 0 ? 'var(--warning-color)' : 
+                    color: stats.avgWeeklyChange === 0 ? 'inherit' : 
+                           stats.avgWeeklyChange > 0 ? 'var(--warning-color)' : 
                            'var(--success-color)' 
                   }}>
-                    {stats.weeklyChange > 0 ? '+' : ''}{stats.weeklyChange.toFixed(2)} kg/week
+                    {stats.avgWeeklyChange > 0 ? '+' : ''}{stats.avgWeeklyChange.toFixed(2)} kg/week
                   </span>
                 </div>
               )}
             </div>
 
+            {stats && stats.weeklyChanges.length > 0 && (
+              <div className="weekly-progress">
+                <h3>Weekly Progress</h3>
+                <div className="weekly-changes">
+                  {stats.weeklyChanges.map((week, index) => (
+                    <div key={week.week} className="week-stat">
+                      <span className="week-label">Week {week.week}</span>
+                      <span className="week-change" style={{
+                        color: week.change === 0 ? 'inherit' :
+                               week.change > 0 ? 'var(--warning-color)' :
+                               'var(--success-color)'
+                      }}>
+                        {week.change > 0 ? '+' : ''}{week.change.toFixed(2)} kg
+                      </span>
+                      <span className="week-avg">Avg: {week.avgWeight.toFixed(1)} kg</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {metabolismStatus && (
               <div className="metabolism-info">
-                <h4>Metabolism Check</h4>
+                <h4>Progress Analysis</h4>
                 <div className={`metabolism-status ${metabolismStatus.isOnTrack ? 'status-good' : 'status-warning'}`}>
                   <span className="status-icon">
                     {metabolismStatus.isOnTrack ? '✅' : '⚠️'}

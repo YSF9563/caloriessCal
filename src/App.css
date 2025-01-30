@@ -1051,16 +1051,15 @@ input:focus {
 .weight-input {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   margin: 1rem 0;
   position: relative;
   z-index: 1;
-  min-height: 60px;
 }
 
 .weight-input input {
   flex: 1;
-  min-height: 50px;
+  min-height: 45px;
   padding: 0.75rem 1rem;
   font-size: 1rem;
   border: 1px solid var(--border-color);
@@ -1069,23 +1068,24 @@ input:focus {
   color: var(--text-color);
   text-align: center;
   font-weight: 600;
-  width: 100%;
   transition: var(--transition);
 }
 
-.weight-input input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px var(--primary-light-transparent, rgba(99, 102, 241, 0.2));
-  transform: scale(1.02);
+.add-weight-btn {
+  min-height: 45px;
+  padding: 0 1.5rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background: var(--primary-color);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
 }
 
-.weight-input .unit {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  font-weight: 600;
-  padding: 0 1rem;
-  min-width: 40px;
-  text-align: center;
+.add-weight-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
 }
 
 .weight-stats {
@@ -1188,26 +1188,28 @@ input:focus {
 }
 
 .metabolism-info {
-  background: rgba(30, 41, 59, 0.6);
+  background: var(--card-background);
   padding: 1.5rem;
   border-radius: var(--border-radius);
-  margin-top: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  text-align: left;
+  margin: 1.5rem 0;
+  border: var(--glass-border);
 }
 
 .metabolism-info h4 {
-  font-size: 1.1rem;
   margin-bottom: 1rem;
+  font-size: 1.1rem;
   color: var(--text-color);
 }
 
 .metabolism-status {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  color: var(--text-secondary);
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--input-background);
+  border-radius: var(--border-radius);
+  font-size: 0.95rem;
+  line-height: 1.4;
 }
 
 .status-icon {
@@ -1250,10 +1252,17 @@ input:focus {
   }
 
   .weight-input {
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
     gap: 0.5rem;
-    min-height: 45px;
+  }
+
+  .weight-input input,
+  .add-weight-btn {
+    width: 100%;
+  }
+
+  .add-weight-btn {
+    min-height: 40px;
   }
 
   .weight-input input {
@@ -1486,5 +1495,79 @@ input:focus {
   input {
     padding: 0.6rem 0.75rem;
     font-size: 0.9rem;
+  }
+}
+
+/* Weekly Progress Styles */
+.weekly-progress {
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border: var(--glass-border);
+}
+
+.weekly-progress h3 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: var(--text-color);
+}
+
+.weekly-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.week-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--input-background);
+  border-radius: var(--border-radius);
+  border: var(--glass-border);
+  transition: var(--transition);
+}
+
+.week-stat:hover {
+  transform: translateX(5px);
+}
+
+.week-label {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.week-change {
+  font-weight: 600;
+}
+
+.week-avg {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 480px) {
+  .week-stat {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .weight-input {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .weight-input input,
+  .add-weight-btn {
+    width: 100%;
+  }
+
+  .add-weight-btn {
+    min-height: 40px;
   }
 }
